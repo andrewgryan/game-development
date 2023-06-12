@@ -149,7 +149,7 @@ const main = () => {
     then = now;
 
     drawScene(gl, programInfo, buffers, squareRotation, texture);
-    squareRotation += deltaTime;
+    // squareRotation += deltaTime;
 
     requestAnimationFrame(render);
   }

@@ -56,7 +56,7 @@ function initTextureBuffer(gl) {
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
   // Educated guess
-  const coordinates = [1, 1, 1, 0, 0, 1, 0, 0];
+  const coordinates = [1, 1, 0, 1, 1, 0, 0, 0];
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coordinates), gl.STATIC_DRAW);
 
