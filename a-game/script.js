@@ -4,7 +4,7 @@ import { loadTexture } from "./load-texture.js";
 
 const main = () => {
   // Canvas set-up
-  const canvas = document.getElementById("app");
+  const canvas = document.getElementById("app", { premultipliedAlpha: false });
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
 
@@ -41,6 +41,7 @@ const main = () => {
   
     void main() {
       gl_FragColor = texture2D(uSampler, vTextureCoord);
+      gl_FragColor.rgb *= gl_FragColor.a;
     }
   `;
 
