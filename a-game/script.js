@@ -1,5 +1,6 @@
 import { initBuffers } from "./init-buffers.js";
 import { drawScene } from "./draw-scene.js";
+import { loadTexture } from "./load-texture.js";
 
 const main = () => {
   // Canvas set-up
@@ -20,24 +21,26 @@ const main = () => {
   // Vertex shader program
   const vsSource = `
     attribute vec4 aVertexPosition;
-    attribute vec4 aVertexColor;
+    attribute vec2 aTextureCoord;
   
     uniform mat4 uModelViewMatrix;
     uniform mat4 uProjectionMatrix;
 
-    varying lowp vec4 vColor;
+    varying highp vec2 vTextureCoord;
 
     void main() {
       gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
-      vColor = aVertexColor;
+      vTextureCoord = aTextureCoord;
     }
   `;
 
   const fsSource = `
-    varying lowp vec4 vColor;
+    varying highp vec2 vTextureCoord;
+
+    uniform sampler2D uSampler;
   
     void main() {
-      gl_FragColor = vColor;
+      gl_FragColor = texture2D(uSampler, vTextureCoord);
     }
   `;
 
@@ -110,7 +113,7 @@ const main = () => {
     program: shaderProgram,
     attribLocations: {
       vertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
-      vertexColor: gl.getAttribLocation(shaderProgram, "aVertexColor"),
+      textureCoord: gl.getAttribLocation(shaderProgram, "aTextureCoord"),
     },
     uniformLocations: {
       projectionMatrix: gl.getUniformLocation(
@@ -118,12 +121,18 @@ const main = () => {
         "uProjectionMatrix"
       ),
       modelViewMatrix: gl.getUniformLocation(shaderProgram, "uModelViewMatrix"),
+      uSampler: gl.getUniformLocation(shaderProgram, "uSampler"),
     },
   };
 
   // Here's where we call the routine that builds all the
   // objects we'll be drawing.
   const buffers = initBuffers(gl);
+
+  // Load texture
+  const texture = loadTexture(gl, "clover.png");
+  // Flip image pixels into the bottom-to-top order that WebGL expects.
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
   // Rotation settings
   let squareRotation = 0.0;
@@ -138,7 +147,7 @@ const main = () => {
     deltaTime = now - then;
     then = now;
 
-    drawScene(gl, programInfo, buffers, squareRotation);
+    drawScene(gl, programInfo, buffers, squareRotation, texture);
     squareRotation += deltaTime;
 
     requestAnimationFrame(render);

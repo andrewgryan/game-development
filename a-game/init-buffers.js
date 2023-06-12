@@ -1,7 +1,7 @@
 export function initBuffers(gl) {
   return {
     position: initPositionBuffer(gl),
-    color: initColorBuffer(gl),
+    textureCoord: initTextureBuffer(gl),
   };
 }
 
@@ -49,4 +49,16 @@ function initColorBuffer(gl) {
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 
   return colorBuffer;
+}
+
+function initTextureBuffer(gl) {
+  const buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+  // Educated guess
+  const coordinates = [1, 1, 1, 0, 0, 1, 0, 0];
+
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coordinates), gl.STATIC_DRAW);
+
+  return buffer;
 }
