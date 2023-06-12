@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head lang="en">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Simple WebGL pixel art game</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+      }
+      .container {
+        position: relative;
+        background-color: #333;
+        width: 100svw;
+        min-height: 100svh;
+      }
+
+      .container canvas {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: red;
+      }
+    </style>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
+      integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
+      crossorigin="anonymous"
+      defer
+    ></script>
+  </head>
+  <body>
+    <div class="container">
+      <canvas id="app"></canvas>
+    </div>
+    <script type="module">
+      import "./script.js";
+    </script>
+  </body>
+</html>
