@@ -125,8 +125,25 @@ const main = () => {
   // objects we'll be drawing.
   const buffers = initBuffers(gl);
 
+  // Rotation settings
+  let squareRotation = 0.0;
+  let deltaTime = 0;
+
   // Draw the scene
-  drawScene(gl, programInfo, buffers);
+  let then = 0;
+
+  // Draw the scene repeatedly
+  function render(now) {
+    now *= 0.001; // convert to seconds
+    deltaTime = now - then;
+    then = now;
+
+    drawScene(gl, programInfo, buffers, squareRotation);
+    squareRotation += deltaTime;
+
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
 };
 
 main();
