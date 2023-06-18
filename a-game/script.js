@@ -138,12 +138,12 @@ const main = () => {
   // Rotation settings
   let z = 40;
   let box = worldBox(gl, z);
-  let x = box.xMin;
-  let y = box.yMax;
+  let x = box.xMin + box.xWidth / 2;
+  let y = box.yMin + box.yWidth / 2;
   let vx = 0.0;
   let vy = 0.0;
-  let dv = box.xWidth / 1000;
-  let rotation = 0.0;
+  let dv = box.xWidth / 10000;
+  let rotation = Math.PI / 2;
   let deltaTime = 0;
 
   document.addEventListener("keypress", (ev) => {
