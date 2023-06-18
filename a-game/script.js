@@ -1,5 +1,5 @@
 import { initBuffers } from "./init-buffers.js";
-import { drawScene } from "./draw-scene.js";
+import { drawScene, makeModelViewMatrix, worldBox } from "./draw-scene.js";
 import { loadTexture } from "./load-texture.js";
 
 const main = () => {
@@ -131,13 +131,31 @@ const main = () => {
   const buffers = initBuffers(gl);
 
   // Load texture
-  const texture = loadTexture(gl, "clover.png");
+  const texture = loadTexture(gl, "ship.png");
   // Flip image pixels into the bottom-to-top order that WebGL expects.
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
   // Rotation settings
-  let squareRotation = 0.0;
+  let z = 40;
+  let box = worldBox(gl, z);
+  let x = box.xMin;
+  let y = box.yMax;
+  let vx = 0.0;
+  let vy = 0.0;
+  let dv = box.xWidth / 1000;
+  let rotation = 0.0;
   let deltaTime = 0;
+
+  document.addEventListener("keypress", (ev) => {
+    if (ev.key == "k") {
+      rotation += 5 * (Math.PI / 180);
+    } else if (ev.key == "j") {
+      rotation -= 5 * (Math.PI / 180);
+    } else if (ev.key == "l") {
+      vx += dv * Math.cos(rotation);
+      vy += dv * Math.sin(rotation);
+    }
+  });
 
   // Draw the scene
   let then = 0;
@@ -148,7 +166,28 @@ const main = () => {
     deltaTime = now - then;
     then = now;
 
-    drawScene(gl, programInfo, buffers, squareRotation, texture);
+    // Move spaceship
+    x += vx;
+    y += vy;
+
+    // Loop dimension
+    if (x > box.xMax) {
+      x -= box.xWidth;
+    }
+    if (x < box.xMin) {
+      x += box.xWidth;
+    }
+    if (y > box.yMax) {
+      y -= box.yWidth;
+    }
+    if (y < box.yMin) {
+      y += box.yWidth;
+    }
+
+    const squareRotation = rotation - Math.PI / 2;
+    const modelViewMatrix = makeModelViewMatrix(squareRotation, x, y, z);
+
+    drawScene(gl, programInfo, buffers, modelViewMatrix, texture);
     // squareRotation += deltaTime;
 
     requestAnimationFrame(render);

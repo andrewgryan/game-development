@@ -1,5 +1,41 @@
-export function drawScene(gl, programInfo, buffers, squareRotation, texture) {
-  gl.clearColor(0.7, 1.0, 0.7, 1.0); // Clear to black, fully opaque
+export function makeModelViewMatrix(squareRotation, x, y, z) {
+  // Set the drawing position to the "identity" point, which is
+  // the center of the scene.
+  const modelViewMatrix = mat4.create();
+
+  // Now move the drawing position a bit to where we want to
+  // start drawing the square.
+  mat4.translate(
+    modelViewMatrix, // destination matrix
+    modelViewMatrix, // matrix to translate
+    [x, y, -1 * z]
+  ); // amount to translate
+
+  mat4.rotate(
+    modelViewMatrix, // destination matrix
+    modelViewMatrix, // matrix to rotate
+    squareRotation, // amount to rotate in radians
+    [0, 0, 1]
+  ); // axis to rotate around
+  return modelViewMatrix;
+}
+
+export function worldBox(gl, z) {
+  const fieldOfView = (45 * Math.PI) / 180; // in radians
+  const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+
+  const angle = fieldOfView / 2;
+  const y = z * Math.tan(angle);
+  const x = y * aspect;
+
+  const xWidth = 2 * x;
+  const yWidth = 2 * y;
+
+  return { xMin: -1 * x, xMax: x, yMin: -1 * y, yMax: y, xWidth, yWidth };
+}
+
+export function drawScene(gl, programInfo, buffers, modelViewMatrix, texture) {
+  gl.clearColor(0.1, 0.1, 0.1, 1.0); // Clear to black, fully opaque
   gl.clearDepth(1.0); // Clear everything
   gl.enable(gl.DEPTH_TEST); // Enable depth testing
   gl.depthFunc(gl.LEQUAL); // Near things obscure far things
@@ -28,25 +64,6 @@ export function drawScene(gl, programInfo, buffers, squareRotation, texture) {
   // note: glmatrix.js always has the first argument
   // as the destination to receive the result.
   mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
-
-  // Set the drawing position to the "identity" point, which is
-  // the center of the scene.
-  const modelViewMatrix = mat4.create();
-
-  // Now move the drawing position a bit to where we want to
-  // start drawing the square.
-  mat4.translate(
-    modelViewMatrix, // destination matrix
-    modelViewMatrix, // matrix to translate
-    [-0.0, 0.0, -3.0]
-  ); // amount to translate
-
-  mat4.rotate(
-    modelViewMatrix, // destination matrix
-    modelViewMatrix, // matrix to rotate
-    squareRotation, // amount to rotate in radians
-    [0, 0, 1]
-  ); // axis to rotate around
 
   // Tell WebGL how to pull out the positions from the position
   // buffer into the vertexPosition attribute.
