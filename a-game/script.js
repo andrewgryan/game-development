@@ -144,7 +144,6 @@ const main = () => {
   let vy = 0.0;
   let dv = box.xWidth / 10000;
   let rotation = Math.PI / 2;
-  let deltaTime = 0;
 
   document.addEventListener("keypress", (ev) => {
     if (ev.key == "k") {
@@ -157,15 +156,8 @@ const main = () => {
     }
   });
 
-  // Draw the scene
-  let then = 0;
-
   // Draw the scene repeatedly
-  function render(now) {
-    now *= 0.001; // convert to seconds
-    deltaTime = now - then;
-    then = now;
-
+  function render() {
     // Move spaceship
     x += vx;
     y += vy;
@@ -188,7 +180,6 @@ const main = () => {
     const modelViewMatrix = makeModelViewMatrix(squareRotation, x, y, z);
 
     drawScene(gl, programInfo, buffers, modelViewMatrix, texture);
-    // squareRotation += deltaTime;
 
     requestAnimationFrame(render);
   }
