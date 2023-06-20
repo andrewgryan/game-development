@@ -1,54 +1,14 @@
 import mat3 from "https://cdn.jsdelivr.net/npm/gl-mat3@2.0.0/+esm";
-window.mat3 = mat3;
+import { shaderCompiler, programCompiler } from "./lib.js";
 
 const el = document.getElementById("game");
 const gl = el.getContext("webgl");
 
 // Program
-const compiler = (gl, shaderType) => (shaderSource) => {
-  // Create the shader object
-  var shader = gl.createShader(shaderType);
-
-  // Set the shader source code.
-  gl.shaderSource(shader, shaderSource);
-
-  // Compile the shader
-  gl.compileShader(shader);
-
-  // Check if it compiled
-  var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-  if (!success) {
-    // Something went wrong during compilation; get the error
-    throw "could not compile shader:" + gl.getShaderInfoLog(shader);
-  }
-
-  return shader;
-};
-
-const programCompiler = (gl) => (shaders) => {
-  // create a program.
-  var program = gl.createProgram();
-
-  // attach the shaders.
-  gl.attachShader(program, shaders.vertex);
-  gl.attachShader(program, shaders.fragment);
-
-  // link the program.
-  gl.linkProgram(program);
-
-  // Check if it linked.
-  var success = gl.getProgramParameter(program, gl.LINK_STATUS);
-  if (!success) {
-    // something went wrong with the link
-    throw "program failed to link:" + gl.getProgramInfoLog(program);
-  }
-
-  return program;
-};
 
 const compile = {
-  vertex: compiler(gl, gl.VERTEX_SHADER),
-  fragment: compiler(gl, gl.FRAGMENT_SHADER),
+  vertex: shaderCompiler(gl, gl.VERTEX_SHADER),
+  fragment: shaderCompiler(gl, gl.FRAGMENT_SHADER),
   program: programCompiler(gl),
 };
 
