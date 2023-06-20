@@ -5,7 +5,6 @@ const el = document.getElementById("game");
 const gl = el.getContext("webgl");
 
 // Program
-
 const compile = {
   vertex: shaderCompiler(gl, gl.VERTEX_SHADER),
   fragment: shaderCompiler(gl, gl.FRAGMENT_SHADER),
@@ -13,7 +12,8 @@ const compile = {
 };
 
 const shaders = {
-  vertex: compile.vertex(`
+  tractor: {
+    vertex: compile.vertex(`
 attribute vec4 a_position;
 attribute vec2 a_texcoord;
 
@@ -25,7 +25,7 @@ void main() {
     gl_Position = u_model * a_position;
     v_texcoord = vec2((u_transform * vec3(a_texcoord, 1.)).xy);
 }`),
-  fragment: compile.fragment(`
+    fragment: compile.fragment(`
 precision mediump float;
 varying vec2 v_texcoord;
 uniform sampler2D u_texture;
@@ -40,9 +40,27 @@ void main() {
 
     gl_FragColor = texture2D(u_texture, v_texcoord);     
 }`),
+  },
+  field: {
+    vertex: compile.vertex(`
+      attribute vec4 a_position;
+      void main() {
+        gl_Position = a_position;
+      }
+      `),
+    fragment: compile.fragment(`
+      precision mediump float;
+      void main() {
+        gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0);
+      }
+      `),
+  },
 };
 
-const program = compile.program(shaders);
+const programs = {
+  tractor: compile.program(shaders.tractor),
+  field: compile.program(shaders.field),
+};
 
 // Uniform
 const uniform = (gl, program, name) => {
@@ -52,8 +70,8 @@ const uniform = (gl, program, name) => {
   };
 };
 
-const u_model = uniform(gl, program, "u_model");
-const u_transform = uniform(gl, program, "u_transform");
+const u_model = uniform(gl, programs.tractor, "u_model");
+const u_transform = uniform(gl, programs.tractor, "u_transform");
 
 /**
  * Attribute
@@ -77,8 +95,8 @@ const entity = {
   size: 2,
   count: 6,
 };
-const a_position = attribute(gl, program, "a_position", entity.data);
-const a_texcoord = attribute(gl, program, "a_texcoord", entity.uv);
+const a_position = attribute(gl, programs.tractor, "a_position", entity.data);
+const a_texcoord = attribute(gl, programs.tractor, "a_texcoord", entity.uv);
 
 // Match canvas size to CSS size
 gl.canvas.width = gl.canvas.clientWidth;
@@ -89,7 +107,7 @@ gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 gl.clearColor(0, 0, 0, 0);
 gl.clear(gl.COLOR_BUFFER_BIT);
 
-gl.useProgram(program);
+gl.useProgram(programs.tractor);
 
 // Uniforms
 const pixel = 32;
