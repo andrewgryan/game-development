@@ -122,7 +122,7 @@ gl.clear(gl.COLOR_BUFFER_BIT);
 gl.useProgram(program);
 
 // Uniforms
-const pixel = 128;
+const pixel = 32;
 gl.uniformMatrix4fv(
   u_model.location,
   false,
@@ -208,20 +208,61 @@ const draw = {
 };
 
 // Game
-let i = 0;
-let j = 0;
+let sprite = 0;
+let frame = 0;
 document.addEventListener("keypress", (ev) => {
   if (ev.key == "k") {
-    j += 1;
+    sprite = (sprite + 1) % 3;
+    frame = 0;
   }
 });
+
+const sprites = {
+  0: [
+    [0, 0],
+    [1, 0],
+    [2, 0],
+    [3, 0],
+    [4, 0],
+    [5, 0],
+    [6, 0],
+  ],
+  1: [
+    [0, 1],
+    [1, 1],
+    [2, 1],
+    [3, 1],
+    [4, 1],
+    [5, 1],
+    [6, 1],
+    [0, 3],
+    [1, 3],
+    [2, 3],
+    [3, 3],
+  ],
+  2: [
+    [0, 2],
+    [1, 2],
+    [2, 2],
+    [3, 2],
+    [4, 2],
+    [5, 2],
+    [6, 2],
+    [4, 3],
+  ],
+};
+
 const render = () => {
+  const [i, j] = sprites[sprite][frame];
+  console.log(i, j);
   const x_offset = (i % 7) * (1 / 7);
   const y_offset = (j % 4) * (1 / 4);
 
   gl.uniform2fv(u_offset.location, new Float32Array([x_offset, y_offset]));
   gl.drawArrays(draw.mode, draw.first, draw.count);
-  i += 1;
+
+  // Advance animation by one frame
+  frame = (frame + 1) % sprites[sprite].length;
 };
 
 setInterval(render, 1000 / 7);
