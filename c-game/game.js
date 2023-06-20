@@ -52,16 +52,23 @@ const compile = {
 const shaders = {
   vertex: compile.vertex(`
 attribute vec4 a_position;
+attribute vec2 a_texcoord;
+
 uniform mat4 u_model;
+uniform vec2 u_offset;
+varying vec2 v_texcoord;
 
 void main() {
     gl_Position = u_model * a_position;
+    v_texcoord = vec2(1. / 7., 1. / 4.) * a_texcoord + u_offset;
 }`),
   fragment: compile.fragment(`
 precision mediump float;
+varying vec2 v_texcoord;
+uniform sampler2D u_texture;
 
 void main() {
-    gl_FragColor = vec4(0.2, 0.9, 0.0, 1.0);     
+    gl_FragColor = texture2D(u_texture, v_texcoord);     
 }`),
 };
 
@@ -76,13 +83,18 @@ const uniform = (gl, program, name) => {
 };
 
 const u_model = uniform(gl, program, "u_model");
+const u_offset = uniform(gl, program, "u_offset");
 
-// Attribute
-const attribute = (gl, program, name, entity) => {
+/**
+ * Attribute
+ * @param {string} name
+ * @param {Array.<number>} data
+ */
+const attribute = (gl, program, name, data) => {
   const location = gl.getAttribLocation(program, name);
   const buffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(entity.data), gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
   return {
     location,
     buffer,
@@ -91,10 +103,12 @@ const attribute = (gl, program, name, entity) => {
 
 const entity = {
   data: [-1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, 1],
+  uv: [0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0],
   size: 2,
   count: 6,
 };
-const a_position = attribute(gl, program, "a_position", entity);
+const a_position = attribute(gl, program, "a_position", entity.data);
+const a_texcoord = attribute(gl, program, "a_texcoord", entity.uv);
 
 // Match canvas size to CSS size
 gl.canvas.width = gl.canvas.clientWidth;
@@ -108,13 +122,66 @@ gl.clear(gl.COLOR_BUFFER_BIT);
 gl.useProgram(program);
 
 // Uniforms
+const pixel = 128;
 gl.uniformMatrix4fv(
   u_model.location,
   false,
-  new Float32Array([0.2, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
+  new Float32Array([
+    pixel / gl.canvas.clientWidth,
+    0,
+    0,
+    0,
+    0,
+    pixel / gl.canvas.clientHeight,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+  ])
 );
 
+gl.uniform2fv(u_offset.location, new Float32Array([0, 0]));
+
+// Textures
+const pixels = new Uint8Array([0, 255, 0, 255]); // Single pixel
+const texture = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, texture);
+gl.texImage2D(
+  gl.TEXTURE_2D,
+  0,
+  gl.RGBA,
+  1,
+  1,
+  0,
+  gl.RGBA,
+  gl.UNSIGNED_BYTE,
+  pixels
+);
+const image = new Image();
+image.addEventListener("load", () => {
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+});
+image.src = "tractor.png";
+
 // Attributes
+
+// Texcoord
+gl.enableVertexAttribArray(a_texcoord.location);
+gl.bindBuffer(gl.ARRAY_BUFFER, a_texcoord.buffer);
+
+gl.vertexAttribPointer(a_texcoord.location, entity.size, gl.FLOAT, false, 0, 0);
+
+// Position
 gl.enableVertexAttribArray(a_position.location);
 gl.bindBuffer(gl.ARRAY_BUFFER, a_position.buffer);
 
@@ -139,4 +206,29 @@ const draw = {
   first: 0,
   count: entity.count,
 };
-gl.drawArrays(draw.mode, draw.first, draw.count);
+
+// Game
+let i = 0;
+let j = 0;
+document.addEventListener("keypress", (ev) => {
+  if (ev.key == "k") {
+    j += 1;
+  }
+});
+const render = () => {
+  const x_offset = (i % 7) * (1 / 7);
+  const y_offset = (j % 4) * (1 / 4);
+
+  gl.uniform2fv(u_offset.location, new Float32Array([x_offset, y_offset]));
+  gl.drawArrays(draw.mode, draw.first, draw.count);
+  i += 1;
+};
+
+setInterval(render, 1000 / 7);
+render();
+
+// const render = () => {
+//   requestAnimationFrame(render);
+//   gl.drawArrays(draw.mode, draw.first, draw.count);
+// };
+// requestAnimationFrame(render);
