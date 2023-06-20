@@ -60,7 +60,7 @@ varying vec2 v_texcoord;
 
 void main() {
     gl_Position = u_model * a_position;
-    v_texcoord = vec2(1. / 7., 1. / 4.) * a_texcoord + u_offset;
+    v_texcoord = vec2(1. / 7., 1. / 4.) * (vec2(-1., 1.) * a_texcoord + vec2(1., 0.)) + u_offset;
 }`),
   fragment: compile.fragment(`
 precision mediump float;
