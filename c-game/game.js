@@ -1,3 +1,6 @@
+import mat3 from "https://cdn.jsdelivr.net/npm/gl-mat3@2.0.0/+esm";
+window.mat3 = mat3;
+
 const el = document.getElementById("game");
 const gl = el.getContext("webgl");
 
@@ -55,12 +58,12 @@ attribute vec4 a_position;
 attribute vec2 a_texcoord;
 
 uniform mat4 u_model;
-uniform vec2 u_offset;
+uniform mat3 u_transform;
 varying vec2 v_texcoord;
 
 void main() {
     gl_Position = u_model * a_position;
-    v_texcoord = vec2(1. / 7., 1. / 4.) * (vec2(-1., 1.) * a_texcoord + vec2(1., 0.)) + u_offset;
+    v_texcoord = vec2((u_transform * vec3(a_texcoord, 1.)).xy);
 }`),
   fragment: compile.fragment(`
 precision mediump float;
@@ -83,7 +86,7 @@ const uniform = (gl, program, name) => {
 };
 
 const u_model = uniform(gl, program, "u_model");
-const u_offset = uniform(gl, program, "u_offset");
+const u_transform = uniform(gl, program, "u_transform");
 
 /**
  * Attribute
@@ -116,7 +119,7 @@ gl.canvas.height = gl.canvas.clientHeight;
 gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
 // Render
-gl.clearColor(0.25, 0.5, 0.75, 1);
+gl.clearColor(0, 0, 0, 0);
 gl.clear(gl.COLOR_BUFFER_BIT);
 
 gl.useProgram(program);
@@ -146,10 +149,14 @@ gl.uniformMatrix4fv(
   ])
 );
 
-gl.uniform2fv(u_offset.location, new Float32Array([0, 0]));
+let transform = mat3.create();
+mat3.scale(transform, transform, [1 / 7, 1 / 4]);
+mat3.translate(transform, transform, [0, 1]);
+
+gl.uniformMatrix3fv(u_transform.location, false, transform);
 
 // Textures
-const pixels = new Uint8Array([0, 255, 0, 255]); // Single pixel
+const pixels = new Uint8Array([0, 0, 0, 0]); // Single pixel
 const texture = gl.createTexture();
 gl.bindTexture(gl.TEXTURE_2D, texture);
 gl.texImage2D(
@@ -212,7 +219,7 @@ let sprite = 0;
 let frame = 0;
 document.addEventListener("keypress", (ev) => {
   if (ev.key == "k") {
-    sprite = (sprite + 1) % 3;
+    sprite = (sprite + 1) % 4;
     frame = 0;
   }
 });
@@ -250,15 +257,39 @@ const sprites = {
     [6, 2],
     [4, 3],
   ],
+  3: [
+    [0, 1],
+    [1, 1],
+    [2, 1],
+    [3, 1],
+    [4, 1],
+    [5, 1],
+    [6, 1],
+    [0, 3],
+    [1, 3],
+    [2, 3],
+    [3, 3],
+  ],
 };
 
 const render = () => {
   const [i, j] = sprites[sprite][frame];
-  console.log(i, j);
-  const x_offset = (i % 7) * (1 / 7);
-  const y_offset = (j % 4) * (1 / 4);
 
-  gl.uniform2fv(u_offset.location, new Float32Array([x_offset, y_offset]));
+  let transform = mat3.create();
+
+  // Scale and rotate
+  mat3.scale(transform, transform, [1 / 7, 1 / 4]);
+  mat3.translate(transform, transform, [i % 7, j % 4]);
+
+  // Flip about y-axis
+  if (sprite === 3) {
+    mat3.translate(transform, transform, [0.5, 0]);
+    mat3.scale(transform, transform, [-1, 1]);
+    mat3.translate(transform, transform, [-0.5, 0]);
+  }
+
+  gl.uniformMatrix3fv(u_transform.location, false, transform);
+
   gl.drawArrays(draw.mode, draw.first, draw.count);
 
   // Advance animation by one frame
