@@ -20,19 +20,18 @@ body {
 }
 
 header {
-  display: grid;
-  place-items: center;
   color: var(--text-accent);
 }
 
 h1 {
   font-size: var(--fs-xl);
+  overflow-wrap: break-word;
 }
 
 h1,
 h2,
 h3 {
-  text-wrap: balance;
+  /* text-wrap: balance; */
 }
 
 h1 {
