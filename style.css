@@ -4,6 +4,8 @@
   --text-accent: hsl(137deg 100% 45%);
   --font-family: "Major Mono Display", monospace;
   --fs-xl: clamp(3.5rem, 12vw + 1rem, 4.5rem);
+  --size: 1rem;
+  --line-height: 1.5;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,6 +21,7 @@ body {
   background-color: var(--surface);
   max-width: 60ch;
   margin-inline: auto;
+  padding: var(--size);
 }
 
 header {
@@ -38,4 +41,8 @@ h3 {
 
 h1 {
   margin-block: 0;
+}
+
+p {
+  line-height: var(--line-height);
 }
