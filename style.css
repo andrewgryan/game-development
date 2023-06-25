@@ -1,0 +1,19 @@
+:root {
+  --surface: hsl(240deg 3% 94%);
+  --text: hsl(240deg 3% 20%);
+}
+
+@media (prefers-color-scheme: dark) {
+  --surface: hsl(240deg 3% 20%);
+  --text: hsl(240deg 3% 94%);
+}
+
+body {
+  color: var(--text);
+  background-color: var(--surface);
+}
+
+header {
+  display: grid;
+  place-items: center;
+}
