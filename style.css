@@ -3,7 +3,7 @@
   --text: hsl(240deg 3% 20%);
   --text-accent: hsl(137deg 100% 45%);
   --font-family: "Major Mono Display", monospace;
-  --fs-xl: 5rem;
+  --fs-xl: 10vw;
 }
 
 @media (prefers-color-scheme: dark) {
