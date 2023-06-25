@@ -3,7 +3,7 @@
   --text: hsl(240deg 3% 20%);
   --text-accent: hsl(137deg 100% 45%);
   --font-family: "Major Mono Display", monospace;
-  --fs-xl: 10vw;
+  --fs-xl: clamp(2.5rem, 12vw + 1rem, 4.5rem);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -33,4 +33,8 @@ h1,
 h2,
 h3 {
   text-wrap: balance;
+}
+
+h1 {
+  margin-block: 0;
 }
