@@ -6,25 +6,30 @@ let reactiveFn = null;
  * @param {string} tagName
  * @returns {(text: string | HTMLElement ) => HTMLElement}
  */
-const element = (tagName) => (text) => {
-  const el = document.createElement(tagName);
-  let node;
-  if (typeof text === "string") {
-    node = document.createTextNode(text);
-  } else if (text.hasOwnProperty("data")) {
-    // Reactive magic
-    node = document.createTextNode("");
-    reactiveFn = () => {
-      node.nodeValue = text.data;
-    };
-    node.nodeValue = text.data;
-    reactiveFn = null;
-  } else {
-    node = text;
-  }
-  el.appendChild(node);
-  return el;
-};
+const element =
+  (tagName) =>
+  (...nodes) => {
+    const el = document.createElement(tagName);
+    nodes.forEach((text) => {
+      console.log(text);
+      let node;
+      if (typeof text === "string") {
+        node = document.createTextNode(text);
+      } else if (text.hasOwnProperty("data")) {
+        // Reactive magic
+        node = document.createTextNode("");
+        reactiveFn = () => {
+          node.nodeValue = text.data;
+        };
+        node.nodeValue = text.data;
+        reactiveFn = null;
+      } else {
+        node = text;
+      }
+      el.appendChild(node);
+    });
+    return el;
+  };
 
 /**
  * @param {(...args: any[]) => HTMLElement} fn
@@ -43,6 +48,7 @@ const attribute = (fn) => (attrs) => {
 };
 
 export const h1 = attribute(element("h1"));
+export const p = attribute(element("p"));
 export const div = attribute(element("div"));
 
 export const signal = (initialValue) => {
