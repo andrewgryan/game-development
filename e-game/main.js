@@ -1,9 +1,9 @@
 import { h1, div, signal } from "./lib.js";
 
-const s = signal("Hello, World!");
+const counter = signal("");
 
 const App = () => {
-  return div({ class: "App" })(h1()(s));
+  return div({ class: "App" })(h1()(counter));
 };
 
 const add = (parent, child) => {
@@ -16,6 +16,6 @@ add(document.body, App());
 // Render
 const gameLoop = (time) => {
   requestAnimationFrame(gameLoop);
-  s.data = Math.floor(time / 1000);
+  counter.data = (time / 1000).toFixed(2);
 };
 requestAnimationFrame(gameLoop);

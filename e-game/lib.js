@@ -15,7 +15,6 @@ const element = (tagName) => (text) => {
     // Reactive magic
     node = document.createTextNode("");
     reactiveFn = () => {
-      console.log(text.data);
       node.nodeValue = text.data;
     };
     node.nodeValue = text.data;
